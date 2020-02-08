@@ -92,14 +92,20 @@ class Login:
             self.name = res['data']['name']
             self.uid = str(res['data']['uid'])
             self.token = res['data']['token']
+            return True
+        else:
+            return False
 
 
 
 def get_token(acc, pwd):
     login = Login()
-    login.get_token_pho(acc, pwd)
-    with open('a.ini', 'w+', encoding='utf-8') as f:
-        f.write(login.token + '\n')
-        f.write(login.name + '\n')
-        f.write(login.uid)
+    if login.get_token_pho(acc, pwd):
+        with open('a.ini', 'w+', encoding='utf-8') as f:
+            f.write(login.token + '\n')
+            f.write(login.name + '\n')
+            f.write(login.uid)
+        return True
+    else:
+        return False
 
