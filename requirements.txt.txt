@@ -1,4 +1,0 @@
-requests
-jsonpath
-pyDes
-pycryptodome
