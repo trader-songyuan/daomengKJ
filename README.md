@@ -2,6 +2,17 @@
 到梦空间
 # 协议
 本项目遵循MIT协议
+# 运行
+Linux Ubuntu
+```bash
+$ git clone https://github.com/vintingb/daomengKJ.git
+$ sudo pip3 install -r ./requirements.txt
+$ python3 ./daomeng.py
+```
+Windows
+直接releases下下载运行
+
+
 # 目前实现功能
 - [x] 已完成项目
   - [x] 登录
