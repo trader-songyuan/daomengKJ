@@ -7,28 +7,28 @@ import os
 
 app = tk.Tk()
 app.title('到梦空间')
-app.geometry('1200x880')
+app.geometry('1060x800')
 
 tk.Label(app, text='User name:', font=('Arial', 14)).place(x=10, y=0)
 tk.Label(app, text='Password:', font=('Arial', 14)).place(x=10, y=35)
 
 entry_usr_name = tk.Entry(app, font=('Arial', 14))
-entry_usr_name.pack()
 entry_usr_name.place(x=120, y=0)
 entry_usr_pwd = tk.Entry(app, font=('Arial', 14), show="*")
-entry_usr_pwd.pack()
 entry_usr_pwd.place(x=120, y=35)
 
-tk.Label(app, text='选择查询id', font=('Arial', 14)).place(x=500, y=0)
-tk.Label(app, text='选择报名id', font=('Arial', 14)).place(x=500, y=35)
+tk.Label(app, text='输入查询id', font=('Arial', 14)).place(x=500, y=0)
+tk.Label(app, text='输入报名id', font=('Arial', 14)).place(x=500, y=35)
+tk.Label(app, text='输入退出id', font=('Arial', 14)).place(x=500, y=70)
 
 id1 = tk.Entry(app, font=('Arial', 14), width=7)
-id1.pack()
 id1.place(x=620, y=0)
 
 id2 = tk.Entry(app, font=('Arial', 14), width=7)
-id2.pack()
 id2.place(x=620, y=35)
+
+id3 = tk.Entry(app, font=('Arial', 14), width=7)
+id3.place(x=620, y=70)
 
 
 class Main:
@@ -65,9 +65,20 @@ class Main:
         for name, id, statusText in zip(a.names, a.ids, a.statusTexts):
             names.append(name + '   {}   {}'.format(id, statusText))
         list1 = StringVar(value=names)
-        lb = tk.Listbox(app, listvariable=list1, height=len(names), width=67)
-        lb.pack()
-        lb.place(x=6, y=65)
+        lb1 = tk.Listbox(app, listvariable=list1, height=len(names), width=67)
+        lb1.place(x=6, y=65)
+
+    def get_can_join(self):
+        a = Post()
+        names = ['可报名活动']
+        if a.get_can_join(self.token, self.uid):
+            for name, id, statusText in zip(a.names, a.ids, a.statusTexts):
+                names.append(name + '   {}   {}'.format(id, statusText))
+                list1 = StringVar(value=names)
+                lb2 = tk.Listbox(app, listvariable=list1, height=len(names), width=67)
+                lb2.place(x=500, y=245)
+        else:
+            messagebox.showwarning('出错了', '没有活动')
 
     def chiken(self):
         id = id1.get()
@@ -90,16 +101,50 @@ class Main:
             tk.Label(app1, text=res['data']['specialList'][0]['unitcount'], font=('Arial', 14)).place(x=100, y=125)
             tk.Label(app1, text='积分数量', font=('Arial', 14)).place(x=0, y=125)
         else:
-            messagebox.showwarning(title='出错了', message='查询失败，请检查id')
+            messagebox.showwarning(title='出错了', message='查询失败，请检查活动id')
 
     def enter(self):
         id = id2.get()
         a = Post()
         res = a.join(id, self.token, self.uid)
         if res:
-            messagebox.showinfo(title='报名详情', message=res['msg'])
+            if res['code'] == '100':
+                messagebox.showinfo(title='报名详情', message='报名成功')
+            else:
+                messagebox.showinfo(title='报名详情', message=res['msg'])
         else:
             messagebox.showwarning(title='出错了', message='查询失败，请检查id')
+
+    def get_joined(self):
+        a = Post()
+        res = a.get_activity(self.token, self.uid)
+        names = []
+        ids = []
+        heights = ['已报名活动']
+        if res:
+            for li in res['data']['list']:
+                if li['statusText'] == '报名中':
+                    names.append(li['name'])
+                    ids.append(li['aid'])
+            if names:
+                for name, id in zip(names, ids):
+                    heights.append(name + '   {}'.format(id))
+                    list1 = StringVar(value=heights)
+                    lb3 = tk.Listbox(app, listvariable=list1, height=len(heights), width=67)
+                    lb3.place(x=500, y=105)
+            else:
+                messagebox.showwarning('出错了', '没有已报名活动')
+
+    def concle(self):
+        id = id3.get()
+        a = Post()
+        res = a.get_info(id, self.token, self.uid)
+        if res:
+            signUpId = str(res['data']['signUpId'])
+            if a.get_cancle(signUpId, self.token, self.uid)['code'] == '100':
+                messagebox.showinfo(title='成功', message='取消报名成功')
+        else:
+            messagebox.showwarning(title='出错了', message='失败，请检查活动id')
 
 
 def login():
@@ -119,6 +164,7 @@ def chiken():
     else:
         pass
 
+
 def join():
     main = Main()
     if main.login():
@@ -128,16 +174,49 @@ def join():
         pass
 
 
+def can_join():
+    main = Main()
+    if main.login():
+        main.read()
+        main.get_can_join()
+    else:
+        pass
+
+
+def joined():
+    main = Main()
+    if main.login():
+        main.read()
+        main.get_joined()
+    else:
+        pass
+
+
+def concle():
+    main = Main()
+    if main.login():
+        main.read()
+        main.concle()
+    else:
+        pass
+
+
 b = tk.Button(app, text='登录查询', font=('Arial', 12), width=10, height=1, command=login)
-b.pack()
 b.place(x=380, y=12.5)
 
 b1 = tk.Button(app, text='活动信息查询', font=('Arial', 12), width=10, height=1, command=chiken)
-b1.pack()
 b1.place(x=720, y=0)
 
-b1 = tk.Button(app, text='报名活动', font=('Arial', 12), width=10, height=1, command=join)
-b1.pack()
-b1.place(x=720, y=32)
+b2 = tk.Button(app, text='报名活动', font=('Arial', 12), width=10, height=1, command=join)
+b2.place(x=720, y=32)
+
+b2 = tk.Button(app, text='退出活动', font=('Arial', 12), width=10, height=1, command=concle)
+b2.place(x=720, y=64)
+
+b3 = tk.Button(app, text='查询已报名活动', font=('Arial', 12), width=12, height=1, command=joined)
+b3.place(x=850, y=10)
+
+b4 = tk.Button(app, text='查询可报名活动', font=('Arial', 12), width=12, height=1, command=can_join)
+b4.place(x=850, y=52)
 
 app.mainloop()
