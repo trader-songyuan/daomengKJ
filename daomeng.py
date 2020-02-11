@@ -31,7 +31,7 @@ id3 = tk.Entry(app, font=('Arial', 14), width=7)
 id3.place(x=620, y=70)
 
 
-class Main:
+class Main(Post):
 
     def read(self):
         with open('a.ini', 'r', encoding='utf-8') as f:
@@ -58,21 +58,19 @@ class Main:
                 return False
 
     def get_id(self):
-        a = Post()
-        a.get_ids(self.token, self.uid)
+        self.get_ids(self.token, self.uid)
         messagebox.showinfo('欢迎您', self.name)
         names = []
-        for name, id, statusText in zip(a.names, a.ids, a.statusTexts):
+        for name, id, statusText in zip(self.names, self.ids, self.statusTexts):
             names.append(name + '   {}   {}'.format(id, statusText))
         list1 = StringVar(value=names)
         lb1 = tk.Listbox(app, listvariable=list1, height=len(names), width=67)
         lb1.place(x=6, y=65)
 
-    def get_can_join(self):
-        a = Post()
+    def can_join(self):
         names = ['可报名活动']
-        if a.get_can_join(self.token, self.uid):
-            for name, id, statusText in zip(a.names, a.ids, a.statusTexts):
+        if self.get_can_join(self.token, self.uid):
+            for name, id, statusText in zip(self.names, self.ids, self.statusTexts):
                 names.append(name + '   {}   {}'.format(id, statusText))
                 list1 = StringVar(value=names)
                 lb2 = tk.Listbox(app, listvariable=list1, height=len(names), width=67)
@@ -82,8 +80,7 @@ class Main:
 
     def chiken(self):
         id = id1.get()
-        a = Post()
-        res = a.get_info(id, self.token, self.uid)
+        res = self.get_info(id, self.token, self.uid)
         if res:
             app1 = tk.Toplevel(app)
             app1.geometry('643x360')
@@ -105,8 +102,7 @@ class Main:
 
     def enter(self):
         id = id2.get()
-        a = Post()
-        res = a.join(id, self.token, self.uid)
+        res = self.join(id, self.token, self.uid)
         if res:
             if res['code'] == '100':
                 messagebox.showinfo(title='报名详情', message='报名成功')
@@ -116,8 +112,7 @@ class Main:
             messagebox.showwarning(title='出错了', message='查询失败，请检查id')
 
     def get_joined(self):
-        a = Post()
-        res = a.get_activity(self.token, self.uid)
+        res = self.get_activity(self.token, self.uid)
         names = []
         ids = []
         heights = ['已报名活动']
@@ -130,25 +125,23 @@ class Main:
                 for name, id in zip(names, ids):
                     heights.append(name + '   {}'.format(id))
                     list1 = StringVar(value=heights)
-                    lb3 = tk.Listbox(app, listvariable=list1, height=len(heights), width=67)
-                    lb3.place(x=500, y=105)
+                    self.lb3 = tk.Listbox(app, listvariable=list1, height=len(heights), width=67)
+                    self.lb3.place(x=500, y=105)
             else:
                 messagebox.showwarning('出错了', '没有已报名活动')
 
     def concle(self):
         id = id3.get()
-        a = Post()
-        res = a.get_info(id, self.token, self.uid)
+        res = self.get_info(id, self.token, self.uid)
         if res:
             signUpId = str(res['data']['signUpId'])
-            if a.get_cancle(signUpId, self.token, self.uid)['code'] == '100':
+            if self.get_cancle(signUpId, self.token, self.uid)['code'] == '100':
                 messagebox.showinfo(title='成功', message='取消报名成功')
         else:
             messagebox.showwarning(title='出错了', message='失败，请检查活动id')
-
+main = Main()
 
 def login():
-    main = Main()
     if main.login():
         main.read()
         main.get_id()
@@ -157,7 +150,6 @@ def login():
 
 
 def chiken():
-    main = Main()
     if main.login():
         main.read()
         main.chiken()
@@ -166,7 +158,6 @@ def chiken():
 
 
 def join():
-    main = Main()
     if main.login():
         main.read()
         main.enter()
@@ -175,16 +166,14 @@ def join():
 
 
 def can_join():
-    main = Main()
     if main.login():
         main.read()
-        main.get_can_join()
+        main.can_join()
     else:
         pass
 
 
 def joined():
-    main = Main()
     if main.login():
         main.read()
         main.get_joined()
@@ -193,10 +182,10 @@ def joined():
 
 
 def concle():
-    main = Main()
     if main.login():
         main.read()
         main.concle()
+        main.lb3.destroy()
     else:
         pass
 
